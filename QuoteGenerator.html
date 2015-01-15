@@ -1,0 +1,218 @@
+<html>
+<head>
+	<style type="text/css">
+		.sectionHeader {
+			margin-top: 20px;
+			width: 130px;
+			float: Left;
+			text-align: Right;
+			padding-right: 5px;
+			clear: Both;
+		}
+		
+		.label {
+			clear: Left;
+			margin-top: 5px;
+			width: 130px;
+			float: Left;
+			text-align: Right;
+			padding-right: 5px;
+		}
+			
+		.textbox {
+			clear: Right;
+			width: 450px;
+			margin-left: 5px;
+			margin-top: 5px;
+			border: 1px white solid;
+			background-color: white;
+			color: black;
+		}
+		
+		.selectableTextbox {
+			clear: Right;
+			width: 450px;
+			margin-left: 5px;
+			margin-top: 5px;
+			color: black;
+		}
+		
+		.textarea {
+			clear: Right;
+			width: 450px;
+			margin-top: 5px;
+			margin-left: 5px;
+			height: 100px;
+		}
+		
+		.button {
+			margin-top: 20px;
+			margin-left: 5px;
+			margin-right: 5px;
+			padding: 2px;
+			width: 120px;
+		}
+
+	</style>
+	<script type="text/javascript">
+	String.prototype.toTitleCase = function() {
+		return this.replace(/([\w&`'‘’"“.@:\/\{\(\[<>_]+-? *)/g, function(match, p1, index, title) {
+//			if (index > 0 && title.charAt(index - 2) !== ":" &&
+//				match.search(/^(a(nd?|s|t)?|b(ut|y)|en|for|i[fn]|o[fnr]|t(he|o)|vs?\.?|via)[ \-]/i) > -1)
+//				return match.toLowerCase();
+			if (title.substring(index - 1, index + 1).search(/['"_{(\[\.]/) > -1)
+				return match.charAt(0) + match.charAt(1).toUpperCase() + match.substr(2);
+			if (match.substr(1).search(/[A-Z]+|&|[\w]+[._][\w]+/) > -1 || 
+				title.substring(index - 1, index + 1).search(/[\])}]/) > -1)
+				return match;
+			return match.charAt(0).toUpperCase() + match.substr(1);
+		});
+	};
+	String.prototype.trim = function() {
+		return this.replace(/^\s+|\s+$/g,"");
+	};
+	String.prototype.ltrim = function() {
+		return this.replace(/^\s+/,"");
+	};
+	String.prototype.rtrim = function() {
+		return this.replace(/\s+$/,"");
+	};
+	String.prototype.reverse = function(){
+		splittext = this.split("");
+		reversetext = splittext.reverse();
+		reversed = reversetext.join("");
+		return reversed;
+	}
+	</script>
+	<script type="text/javascript">
+		var originalQuote = "";
+		var formattedQuote = "";
+		var pushPinTemplate = "";
+		var puzzleHint = "";
+		var puzzleHintSolved = "";
+		var puzzleHintDeluxe = "";
+		var wordCount = "";
+		var letterCount = "";
+		var punctuationCount = "";
+		var pinCount = "";
+		var difficultyRating = "";
+		var boxSize = "";
+		var copyPaste = "";
+		
+		function processKey(e)
+		{
+			if (null == e)
+				e = window.event ;
+			if (e.keyCode == 13)  {
+				document.getElementById("processBtn").click();
+				return false;
+			}
+		}
+
+		function processQuote() {
+			// Step 0: Get original quote
+			originalQuote = document.getElementById("originalQuote").value;
+			
+			// Step 1: Convert all characters to uppercase & trim
+			formattedQuote = originalQuote.replace(/\s+/g, " ").trim().toLowerCase();
+			formattedQuote = formattedQuote.toTitleCase();
+			
+			// Step 2: Remove all whitespace
+			pushPinTemplate = originalQuote.toUpperCase().replace(/\s+/g, "");
+			
+			// Step 3: Generate the hint
+			puzzleHint = formattedQuote.toLowerCase().reverse().toTitleCase().reverse();
+			puzzleHint = puzzleHint.replace(/[a-z]/g, function() {return '~';} );
+			puzzleHintSolved = formattedQuote.toUpperCase();
+			puzzleHintDeluxe = puzzleHint.replace(/~/g, " ");
+			
+			// Step 4: Calculate number of words
+			wordCount = formattedQuote.split(' ').length;
+			
+			// Step 5: Calculate total pins
+			pinCount = pushPinTemplate.length;
+			
+			// Step 6: Calculate difficulty & box size
+			if(pinCount > 40) {
+				difficultyRating = "Hard";
+				boxSize = "Large";
+			} else if(pinCount > 20) {
+				difficultyRating = "Medium";
+				boxSize = "Medium";
+			} else if(pinCount > 0) {
+				difficultyRating = "Easy";
+				boxSize = "Small";
+			} else {
+				difficultyRating = "";
+				boxSize = "";
+			}
+				
+			// Step 7: Calculate Letters 
+			// Step 8: Calculate Punctuation
+			var letters = 0;
+			var punctuation = 0;
+			for(i = 0; i < pinCount; i++) {
+				if(pushPinTemplate[i].match(/[A-Z]/gi)) {
+					letters += 1;
+				} else {
+					punctuation += 1;
+				}
+			}
+			letterCount = letters;
+			punctuationCount = punctuation; 
+			
+			// Step 9: Format the spreadsheet import
+			copyPaste = wordCount + "\t" + letterCount + "\t" + punctuationCount + "\t" + pinCount + "\t" + difficultyRating + "\t" + boxSize;
+			
+			// Step 10: Display Results
+			displayResults();
+		}
+		
+		function displayResults() {
+			populateField("formattedQuote", formattedQuote);
+			populateField("pushPinTemplate", pushPinTemplate);
+			populateField("puzzleHint", puzzleHint);
+			populateField("puzzleHintSolved", puzzleHintSolved);
+			populateField("puzzleHintDeluxe", puzzleHintDeluxe);
+			populateField("wordCount", wordCount);
+			populateField("letterCount", letterCount);
+			populateField("punctuationCount", punctuationCount);
+			populateField("pinCount", pinCount);
+			populateField("difficultyRating", difficultyRating);
+			populateField("boxSize", boxSize);
+			populateField("copyPaste", copyPaste);
+		}
+		
+		function populateField(id, value) {
+			document.getElementById(id).value = value;
+		}
+		
+		function selectText(obj)
+		{
+			//document.getElementById(obj.id).focus();
+			//document.getElementById(obj.id).select();
+			obj.focus();
+			obj.select();
+		}
+		
+	</script>
+</head>
+<body>
+	<form id="quotegen" onkeydown="return processKey(event)">
+		<span class="label">Original Quote:</span> <textarea id="originalQuote" class="textarea"></textarea><br/>
+		<span class="label">Formatted Quote:</span> <textarea id="formattedQuote" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
+		<span class="label">Push Pin Template:</span> <textarea id="pushPinTemplate" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
+		<span class="label">Puzzle Hint:</span> <textarea id="puzzleHint" class="textarea" onclick="javascript:selectText(this);"></textarea> <textarea id="puzzleHintSolved" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
+		<span class="label">Deluxe Hint:</span> <textarea id="puzzleHintDeluxe" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
+		<span class="sectionHeader"><u>Statistics:</u></span><br/><br/>
+		<span class="label">Words:</span><input type="text" id="wordCount" disabled class="textbox"><br/>
+		<span class="label">Letters:</span><input type="text" id="letterCount" disabled class="textbox"><br/>
+		<span class="label">Punctuation:</span><input type="text" id="punctuationCount" disabled class="textbox"><br/>
+		<span class="label">Total Pins:</span><input type="text" id="pinCount" disabled class="textbox"><br/>
+		<span class="label">Difficulty:</span><input type="text" id="difficultyRating" disabled class="textbox"><br/>
+		<span class="label">Box Size:</span><input type="text" id="boxSize" disabled class="textbox"><br/>
+		<span class="label">Copy / Paste:</span><input type="text" id="copyPaste" class="selectableTextbox" onclick="javascript:selectText(this);"><br/>
+		<span class="label"></span><input id="processBtn" class="button" type="button" value="Process Quote" onclick="processQuote()"><input class="button" type="reset" value="Clear Form">
+	</form>	
+</body>
+</html>
