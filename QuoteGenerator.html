@@ -23,8 +23,8 @@
 			clear: Right;
 			width: 450px;
 			margin-left: 5px;
-			margin-top: 5px;
-			border: 1px white solid;
+			margin-top: 7px;
+			border: 1px #AAA solid;
 			background-color: white;
 			color: black;
 		}
@@ -34,7 +34,12 @@
 			width: 450px;
 			margin-left: 5px;
 			margin-top: 5px;
+			border: 1px #AAA solid;
 			color: black;
+		}
+		
+		.selectableTextbox.frequency{
+			width: 805px;
 		}
 		
 		.textarea {
@@ -42,7 +47,7 @@
 			width: 450px;
 			margin-top: 5px;
 			margin-left: 5px;
-			height: 100px;
+			height: 80px;
 		}
 		
 		.button {
@@ -50,7 +55,29 @@
 			margin-left: 5px;
 			margin-right: 5px;
 			padding: 2px;
-			width: 120px;
+			width: 150px;
+		}
+
+		.frequencyTextbox {
+			clear: Right;
+			width: 25px;
+			margin-left: 5px;
+			margin-top: 7px;
+			border: 1px #AAA solid;
+			background-color: white;
+			color: black;
+			text-align: center;
+		}
+
+		.frequencyTextboxLabel {
+			clear: Right;
+			width: 25px;
+			margin-left: 5px;
+			margin-top: 7px;
+			border: 1px #AAA solid;
+			background-color: white;
+			color: black;
+			text-align: center;
 		}
 
 	</style>
@@ -88,6 +115,7 @@
 		var originalQuote = "";
 		var formattedQuote = "";
 		var pushPinTemplate = "";
+		var pushPinTemplateRemoved = "";
 		var puzzleHint = "";
 		var puzzleHintSolved = "";
 		var puzzleHintDeluxe = "";
@@ -107,24 +135,30 @@
 				document.getElementById("processBtn").click();
 				return false;
 			}
+			if (e.keyCode == 27) {
+				document.getElementById("resetBtn").click();
+			}
 		}
 
 		function processQuote() {
+
 			// Step 0: Get original quote
 			originalQuote = document.getElementById("originalQuote").value;
-			
-			// Step 1: Convert all characters to uppercase & trim
-			formattedQuote = originalQuote.replace(/\s+/g, " ").trim().toLowerCase();
-			formattedQuote = formattedQuote.toTitleCase();
+			if (originalQuote.length == 0) {
+				return;
+			}
+
+			// Step 1: Remove all excess blank spaces.
+			formattedQuote = originalQuote.replace(/\s+/g, " ").trim();
+			//formattedQuote = formattedQuote.toTitleCase();
 			
 			// Step 2: Remove all whitespace
-			pushPinTemplate = originalQuote.toUpperCase().replace(/\s+/g, "");
+			pushPinTemplate = originalQuote.toUpperCase().replace(/\s+/g, "").replace(/[^a-zA-Z]+/g,'');
+			pushPinTemplateRemoved = originalQuote.toUpperCase().replace(/\s+/g, "").replace(/[a-zA-Z]+/g, '')
 			
 			// Step 3: Generate the hint
 			puzzleHint = formattedQuote.toLowerCase().reverse().toTitleCase().reverse();
 			puzzleHint = puzzleHint.replace(/[a-z]/g, function() {return '~';} );
-			puzzleHintSolved = formattedQuote.toUpperCase();
-			puzzleHintDeluxe = puzzleHint.replace(/~/g, " ");
 			
 			// Step 4: Calculate number of words
 			wordCount = formattedQuote.split(' ').length;
@@ -133,7 +167,10 @@
 			pinCount = pushPinTemplate.length;
 			
 			// Step 6: Calculate difficulty & box size
-			if(pinCount > 40) {
+			if(pinCount > 121) {
+				difficultyRating = "Impossible";
+				boxSize = "Massive";
+			} else if(pinCount > 40) {
 				difficultyRating = "Hard";
 				boxSize = "Large";
 			} else if(pinCount > 20) {
@@ -147,20 +184,12 @@
 				boxSize = "";
 			}
 				
-			// Step 7: Calculate Letters 
+			// Step 7: Calculate Letters
+			letterCount = pushPinTemplate.length;
+
 			// Step 8: Calculate Punctuation
-			var letters = 0;
-			var punctuation = 0;
-			for(i = 0; i < pinCount; i++) {
-				if(pushPinTemplate[i].match(/[A-Z]/gi)) {
-					letters += 1;
-				} else {
-					punctuation += 1;
-				}
-			}
-			letterCount = letters;
-			punctuationCount = punctuation; 
-			
+			punctuationCount = pushPinTemplateRemoved.length;
+
 			// Step 9: Format the spreadsheet import
 			copyPaste = wordCount + "\t" + letterCount + "\t" + punctuationCount + "\t" + pinCount + "\t" + difficultyRating + "\t" + boxSize;
 			
@@ -171,9 +200,8 @@
 		function displayResults() {
 			populateField("formattedQuote", formattedQuote);
 			populateField("pushPinTemplate", pushPinTemplate);
+			populateField("pushPinTemplateRemoved", pushPinTemplateRemoved);
 			populateField("puzzleHint", puzzleHint);
-			populateField("puzzleHintSolved", puzzleHintSolved);
-			populateField("puzzleHintDeluxe", puzzleHintDeluxe);
 			populateField("wordCount", wordCount);
 			populateField("letterCount", letterCount);
 			populateField("punctuationCount", punctuationCount);
@@ -181,6 +209,36 @@
 			populateField("difficultyRating", difficultyRating);
 			populateField("boxSize", boxSize);
 			populateField("copyPaste", copyPaste);
+
+			var frequency = getFrequency(pushPinTemplate)
+			populateField("letterA", frequency['A'])
+			populateField("letterB", frequency['B'])
+			populateField("letterC", frequency['C'])
+			populateField("letterD", frequency['D'])
+			populateField("letterE", frequency['E'])
+			populateField("letterF", frequency['F'])
+			populateField("letterG", frequency['G'])
+			populateField("letterH", frequency['H'])
+			populateField("letterI", frequency['I'])
+			populateField("letterJ", frequency['J'])
+			populateField("letterK", frequency['K'])
+			populateField("letterL", frequency['L'])
+			populateField("letterM", frequency['M'])
+			populateField("letterN", frequency['N'])
+			populateField("letterO", frequency['O'])
+			populateField("letterP", frequency['P'])
+			populateField("letterQ", frequency['Q'])
+			populateField("letterR", frequency['R'])
+			populateField("letterS", frequency['S'])
+			populateField("letterT", frequency['T'])
+			populateField("letterU", frequency['U'])
+			populateField("letterV", frequency['V'])
+			populateField("letterW", frequency['W'])
+			populateField("letterX", frequency['X'])
+			populateField("letterY", frequency['Y'])
+			populateField("letterZ", frequency['Z'])
+			populateField("letterTotal", frequency['='])
+			populateField("copyPasteFrequency", getFrequencyCopyPaste(frequency))
 		}
 		
 		function populateField(id, value) {
@@ -194,17 +252,104 @@
 			obj.focus();
 			obj.select();
 		}
+
+		function getFrequency(string) {
+			var freq = initFrequency();
+
+			for (var i=0; i<string.length;i++) {
+
+				var character = string.charAt(i);
+				
+				if(freq[character]) {
+				
+					freq[character]++;
+				
+				} else {
+				
+					freq[character] = 1;
+				
+				}
+			}
+
+			freq["="] = getFrequencyTotal(freq);
+
+			return freq;
+		};
+
+		function getFrequencyAlphabet() {
+			
+			return "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		
+		}
+
+		function initFrequency() {
+			
+			var freq = {};
+
+			alphabet = getFrequencyAlphabet();
+			for (var i=0; i<alphabet.length;i++) {
+				var character = alphabet.charAt(i);
+				freq[character] = 0;
+			}
+
+			return freq;
+		}
+
+		function getFrequencyCopyPaste(frequency) {
+			
+			var alphabet = getFrequencyAlphabet() + "=";
+			
+			var result = "";
+			for (var i=0; i<alphabet.length;i++) {
+			
+				var letter = alphabet.charAt(i);
+			
+				if(i!==0) result += "\t";
+			
+				result += frequency[letter];
+			
+			}
+			
+			return result;
+		}
+
+		function getFrequencyTotal(frequency) {
+			
+			var totalFrequencyCharacters = 0;
+			var alphabet = getFrequencyAlphabet();
+
+			for (var i=0; i<alphabet.length;i++) {
+				var letter = alphabet.charAt(i);
+				totalFrequencyCharacters += frequency[letter];
+			}
+			
+			return totalFrequencyCharacters;
+		}
+
+		function runTest() {
+			//populateField("originalQuote", "U:_W=<T{c@/8^7AGmIjqb?O+,4:&810!%+a[ZF2;E\"<2={\"WCU7/ubm6|[_egq2_4b;tJ!+mcziP0[Hx:FNaZy*#jcBTu,jNi)ILbfrY#4Z+J{U+!FV2Ij<j}~@,ge\"ymK_I6q7D9=)EAm(&q{J.=oJ,E$WZLtA}P\\/4hA#)YQ`K|O~CurB#NG+(OHKUjSP.{B7l/<6o%@)eV%B4Ygs4\\)r{:UyFjjvQ1*|(]tD`*9)'!,T~Pf$_<x`iZagoQ*b,");
+			populateField("originalQuote", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec magna lacus. Cras at metus non elit faucibus maximus ac sed neque. Nulla molestie vestibulum velit eget porta. Sed dapibus laoreet tincidunt. Cras sed ultrices enim.");
+			processQuote();
+		}
+
+		function resetFocus() {
+			document.getElementById("originalQuote").focus();
+		}
+
+		window.onload = function() {
+  			resetFocus();
+		};
 		
 	</script>
 </head>
 <body>
 	<form id="quotegen" onkeydown="return processKey(event)">
 		<span class="label">Original Quote:</span> <textarea id="originalQuote" class="textarea"></textarea><br/>
-		<span class="label">Formatted Quote:</span> <textarea id="formattedQuote" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
+		<span class="label">Formatted Quote:</br>(extra spaces removed)</span> <textarea id="formattedQuote" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
 		<span class="label">Push Pin Template:</span> <textarea id="pushPinTemplate" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
-		<span class="label">Puzzle Hint:</span> <textarea id="puzzleHint" class="textarea" onclick="javascript:selectText(this);"></textarea> <textarea id="puzzleHintSolved" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
-		<span class="label">Deluxe Hint:</span> <textarea id="puzzleHintDeluxe" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
-		<span class="sectionHeader"><u>Statistics:</u></span><br/><br/>
+		<span class="label">Punctuation:</span> <textarea id="pushPinTemplateRemoved" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
+		<span class="label">Puzzle Hint:</span> <textarea id="puzzleHint" class="textarea" onclick="javascript:selectText(this);"></textarea><br/>
+		<span class="sectionHeader"><u>Statistics</u></span><br/><br/>
 		<span class="label">Words:</span><input type="text" id="wordCount" disabled class="textbox"><br/>
 		<span class="label">Letters:</span><input type="text" id="letterCount" disabled class="textbox"><br/>
 		<span class="label">Punctuation:</span><input type="text" id="punctuationCount" disabled class="textbox"><br/>
@@ -212,7 +357,11 @@
 		<span class="label">Difficulty:</span><input type="text" id="difficultyRating" disabled class="textbox"><br/>
 		<span class="label">Box Size:</span><input type="text" id="boxSize" disabled class="textbox"><br/>
 		<span class="label">Copy / Paste:</span><input type="text" id="copyPaste" class="selectableTextbox" onclick="javascript:selectText(this);"><br/>
-		<span class="label"></span><input id="processBtn" class="button" type="button" value="Process Quote" onclick="processQuote()"><input class="button" type="reset" value="Clear Form">
+		<span class="sectionHeader"><u>Frequency</u></span><br/><br/>
+		<span class="label">Letters:</span><input type="text" disabled class="frequencyTextboxLabel" value="A"><input type="text" disabled class="frequencyTextboxLabel" value="B"><input type="text" disabled class="frequencyTextboxLabel" value="C"><input type="text" disabled class="frequencyTextboxLabel" value="D"><input type="text" disabled class="frequencyTextboxLabel" value="E"><input type="text" disabled class="frequencyTextboxLabel" value="F"><input type="text" disabled class="frequencyTextboxLabel" value="G"><input type="text" disabled class="frequencyTextboxLabel" value="H"><input type="text" disabled class="frequencyTextboxLabel" value="I"><input type="text" disabled class="frequencyTextboxLabel" value="J"><input type="text" disabled class="frequencyTextboxLabel" value="K"><input type="text" disabled class="frequencyTextboxLabel" value="L"><input type="text" disabled class="frequencyTextboxLabel" value="M"><input type="text" disabled class="frequencyTextboxLabel" value="N"><input type="text" disabled class="frequencyTextboxLabel" value="O"><input type="text" disabled class="frequencyTextboxLabel" value="P"><input type="text" disabled class="frequencyTextboxLabel" value="Q"><input type="text" disabled class="frequencyTextboxLabel" value="R"><input type="text" disabled class="frequencyTextboxLabel" value="S"><input type="text" disabled class="frequencyTextboxLabel" value="T"><input type="text" disabled class="frequencyTextboxLabel" value="U"><input type="text" disabled class="frequencyTextboxLabel" value="V"><input type="text" disabled class="frequencyTextboxLabel" value="W"><input type="text" disabled class="frequencyTextboxLabel" value="X"><input type="text" disabled class="frequencyTextboxLabel" value="Y"><input type="text" disabled class="frequencyTextboxLabel" value="Z"><input type="text" disabled class="frequencyTextboxLabel" value="="><br/>
+		<span class="label">Counts:</span><input type="text" id="letterA" disabled class="frequencyTextbox"><input type="text" id="letterB" disabled class="frequencyTextbox"><input type="text" id="letterC" disabled class="frequencyTextbox"><input type="text" id="letterD" disabled class="frequencyTextbox"><input type="text" id="letterE" disabled class="frequencyTextbox"><input type="text" id="letterF" disabled class="frequencyTextbox"><input type="text" id="letterG" disabled class="frequencyTextbox"><input type="text" id="letterH" disabled class="frequencyTextbox"><input type="text" id="letterI" disabled class="frequencyTextbox"><input type="text" id="letterJ" disabled class="frequencyTextbox"><input type="text" id="letterK" disabled class="frequencyTextbox"><input type="text" id="letterL" disabled class="frequencyTextbox"><input type="text" id="letterM" disabled class="frequencyTextbox"><input type="text" id="letterN" disabled class="frequencyTextbox"><input type="text" id="letterO" disabled class="frequencyTextbox"><input type="text" id="letterP" disabled class="frequencyTextbox"><input type="text" id="letterQ" disabled class="frequencyTextbox"><input type="text" id="letterR" disabled class="frequencyTextbox"><input type="text" id="letterS" disabled class="frequencyTextbox"><input type="text" id="letterT" disabled class="frequencyTextbox"><input type="text" id="letterU" disabled class="frequencyTextbox"><input type="text" id="letterV" disabled class="frequencyTextbox"><input type="text" id="letterW" disabled class="frequencyTextbox"><input type="text" id="letterX" disabled class="frequencyTextbox"><input type="text" id="letterY" disabled class="frequencyTextbox"><input type="text" id="letterZ" disabled class="frequencyTextbox"><input type="text" id="letterTotal" disabled class="frequencyTextbox"><br/>
+		<span class="label">Copy / Paste:</span><input type="text" id="copyPasteFrequency" class="selectableTextbox frequency" onclick="javascript:selectText(this);"><br/>
+		<span class="label"></span><input id="processBtn" class="button" type="button" onclick="processQuote()" value="Process Quote [ENTER]"><input id="resetBtn" class="button" type="reset" value="Clear Form [Escape]" onclick="javascript:resetFocus();"><input id="testBtn" class="button" type="button" value="Test Quote" onclick="runTest()"><br/>
 	</form>	
 </body>
 </html>
